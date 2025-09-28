@@ -19,10 +19,13 @@ interface MinecraftVersionManifest {
 }
 
 interface PaperMCProjectResponse {
-  project_id: string;
-  project_name: string;
-  version_groups: string[];
-  versions: string[];
+  project: {
+    id: "string";
+    name: "string";
+  };
+  versions: {
+    [majorVersion: string]: string[];
+  };
 }
 
 export class VersionResolver {
@@ -244,7 +247,7 @@ export class VersionResolver {
       this.logger.debug(`Fetching ${project} versions from PaperMC API`);
 
       const response = await fetch(
-        `https://api.papermc.io/v2/projects/${project}`,
+        `https://fill.papermc.io/v3/projects/${project}`,
       );
 
       if (!response.ok) {
@@ -256,8 +259,12 @@ export class VersionResolver {
       const projectData = (await response.json()) as PaperMCProjectResponse;
 
       // Filter out pre-release versions and only keep versions that can be normalized to semver
-      const releaseVersions = projectData.versions
-        .filter((v) => !v.includes("pre") && !v.includes("snapshot"))
+      const releaseVersions = Object.entries(projectData.versions)
+        .flatMap(([majorVersion, versions]) => versions)
+        .filter(
+          (v) =>
+            !v.includes("pre") && !v.includes("rc") && !v.includes("snapshot"),
+        )
         .filter((v) => this.normalizeVersionForSemver(v) !== null) // Keep original but filter by normalizability
         .sort((a, b) => {
           // Sort using normalized versions for comparison, but keep originals
