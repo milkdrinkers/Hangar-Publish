@@ -55,7 +55,41 @@ export class VersionResolver {
           resolved[platform] =
             await this.resolveMinecraftVersions(versionPatterns);
           break;
-        case "VELOCITY":
+        case "VELOCITY": // Hangar doesn't accept the real velocity version as returned by the PaperMC API, instead it only accepts weird variations
+          const pattern = /^\d+\.\d+(\.\d+)?$/;
+          const velocityVersions = await this.resolvePaperMCVersions(
+            platform.toLowerCase(),
+            versionPatterns,
+          );
+
+          resolved[platform] = velocityVersions
+            .map((v) => {
+              // Custom map old velocity versions e.g. "3.0.0" into "3.0"
+              if (semver.lte(v, "3.0.0")) {
+                if (v === "3.0.0") return "3.0";
+
+                if (v === "1.1.0") return "1.1";
+
+                if (v === "1.0.0") return "1.0";
+              }
+
+              // Custom map modern versions
+              if (semver.gt(v, "3.0.0")) {
+                // Does the same as in old velocity version stripping snapshot and patch number e.g. turning "3.4.0-SNAPSHOT" into "3.4"
+                if (v.includes("0-SNAPSHOT")) {
+                  return v.replace("0-SNAPSHOT", "");
+                }
+
+                // Strips snapshot e.g. turning "3.1.2-SNAPSHOT" into "3.1.2"
+                if (v.includes("-SNAPSHOT")) {
+                  return v.replace("-SNAPSHOT", "");
+                }
+              }
+
+              return v;
+            })
+            .filter((ver) => pattern.test(ver));
+          break;
         case "WATERFALL":
           resolved[platform] = await this.resolvePaperMCVersions(
             platform.toLowerCase(),
@@ -75,7 +109,7 @@ export class VersionResolver {
     patterns: string[],
   ): Promise<string[]> {
     const allVersions = await this.getMinecraftVersions();
-    return this.resolveVersionsWithSemver(patterns, allVersions);
+    return this.resolveVersionsWithSemver("paper", patterns, allVersions);
   }
 
   private async resolvePaperMCVersions(
@@ -83,7 +117,7 @@ export class VersionResolver {
     patterns: string[],
   ): Promise<string[]> {
     const allVersions = await this.getPaperMCVersions(project);
-    return this.resolveVersionsWithSemver(patterns, allVersions);
+    return this.resolveVersionsWithSemver(project, patterns, allVersions);
   }
 
   private resolveGenericVersions(patterns: string[]): string[] {
@@ -112,6 +146,7 @@ export class VersionResolver {
   }
 
   private resolveVersionsWithSemver(
+    project: string,
     patterns: string[],
     availableVersions: string[],
   ): string[] {
@@ -259,8 +294,14 @@ export class VersionResolver {
       const projectData = (await response.json()) as PaperMCProjectResponse;
 
       // Filter out pre-release versions and only keep versions that can be normalized to semver
-      const releaseVersions = Object.entries(projectData.versions)
-        .flatMap(([majorVersion, versions]) => versions)
+      let releaseVersions = Object.entries(projectData.versions)
+        .flatMap(([majorVersion, versions]) => {
+          if (project !== "velocity") {
+            return versions;
+          } else {
+            return { ...versions, majorVersion }; // On Velocity include major-versions as targets
+          }
+        })
         .filter(
           (v) =>
             !v.includes("pre") && !v.includes("rc") && !v.includes("snapshot"),
