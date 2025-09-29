@@ -56,39 +56,67 @@ export class VersionResolver {
             await this.resolveMinecraftVersions(versionPatterns);
           break;
         case "VELOCITY": // Hangar doesn't accept the real velocity version as returned by the PaperMC API, instead it only accepts weird variations
-          const pattern = /^\d+\.\d+(\.\d+)?$/;
-          const velocityVersions = await this.resolvePaperMCVersions(
-            platform.toLowerCase(),
+          // const pattern = /^\d+\.\d+(\.\d+)?$/;
+          // const velocityVersions = await this.resolvePaperMCVersions(
+          //   platform.toLowerCase(),
+          //   versionPatterns,
+          // );
+
+          // resolved[platform] = velocityVersions
+          //   .map((v) => {
+          //     // Custom map old velocity versions e.g. "3.0.0" into "3.0"
+          //     if (semver.lte(v, "3.0.0")) {
+          //       if (v === "3.0.0") return "3.0";
+
+          //       if (v === "1.1.0") return "1.1";
+
+          //       if (v === "1.0.0") return "1.0";
+          //     }
+
+          //     // Custom map modern versions
+          //     if (semver.gt(v, "3.0.0")) {
+          //       // Does the same as in old velocity version stripping snapshot and patch number e.g. turning "3.4.0-SNAPSHOT" into "3.4"
+          //       if (v.includes("0-SNAPSHOT")) {
+          //         return v.replace("0-SNAPSHOT", "");
+          //       }
+
+          //       // Strips snapshot e.g. turning "3.1.2-SNAPSHOT" into "3.1.2"
+          //       if (v.includes("-SNAPSHOT")) {
+          //         return v.replace("-SNAPSHOT", "");
+          //       }
+          //     }
+
+          //     return v;
+          //   })
+          //   .filter((ver) => pattern.test(ver));
+          // FIXME Temporarily hardcode velocity versions until Hangard exposes API to get versions
+          const velocityVersions = [
+            { fill: "3.4.0", hangar: "3.4" },
+            { fill: "3.3.0", hangar: "3.3" },
+            { fill: "3.2.0", hangar: "3.2" },
+            { fill: "3.1.1", hangar: "3.1.1" },
+            { fill: "3.1.0", hangar: "3.1.0" },
+            { fill: "3.0.0", hangar: "3.0" },
+            { fill: "1.1.9", hangar: "1.1.9" },
+            { fill: "1.1.0", hangar: "1.1" },
+            { fill: "1.0.0", hangar: "1.0" },
+          ];
+
+          const results = this.resolveVersionsWithSemver(
+            "velocity",
             versionPatterns,
+            velocityVersions.map((v) => v.fill),
           );
 
-          resolved[platform] = velocityVersions
+          resolved[platform] = results
             .map((v) => {
-              // Custom map old velocity versions e.g. "3.0.0" into "3.0"
-              if (semver.lte(v, "3.0.0")) {
-                if (v === "3.0.0") return "3.0";
-
-                if (v === "1.1.0") return "1.1";
-
-                if (v === "1.0.0") return "1.0";
+              // Map fill version into hangar version
+              for (const ver of velocityVersions) {
+                if (ver.fill === v) return ver.hangar;
               }
-
-              // Custom map modern versions
-              if (semver.gt(v, "3.0.0")) {
-                // Does the same as in old velocity version stripping snapshot and patch number e.g. turning "3.4.0-SNAPSHOT" into "3.4"
-                if (v.includes("0-SNAPSHOT")) {
-                  return v.replace("0-SNAPSHOT", "");
-                }
-
-                // Strips snapshot e.g. turning "3.1.2-SNAPSHOT" into "3.1.2"
-                if (v.includes("-SNAPSHOT")) {
-                  return v.replace("-SNAPSHOT", "");
-                }
-              }
-
-              return v;
+              return null;
             })
-            .filter((ver) => pattern.test(ver));
+            .filter((v) => v !== null);
           break;
         case "WATERFALL":
           resolved[platform] = await this.resolvePaperMCVersions(
