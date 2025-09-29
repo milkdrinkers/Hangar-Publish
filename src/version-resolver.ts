@@ -294,12 +294,12 @@ export class VersionResolver {
       const projectData = (await response.json()) as PaperMCProjectResponse;
 
       // Filter out pre-release versions and only keep versions that can be normalized to semver
-      let releaseVersions = Object.entries(projectData.versions)
+      const releaseVersions = Object.entries(projectData.versions)
         .flatMap(([majorVersion, versions]) => {
           if (project !== "velocity") {
             return versions;
           } else {
-            return { ...versions, majorVersion }; // On Velocity include major-versions as targets
+            return [...versions, majorVersion]; // On Velocity include major-versions as targets
           }
         })
         .filter(
