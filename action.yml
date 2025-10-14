@@ -103,5 +103,5 @@ outputs:
     description: 'Direct URL to the uploaded version page on Hangar'
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
