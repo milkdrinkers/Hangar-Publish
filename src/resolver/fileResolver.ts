@@ -2,65 +2,73 @@ import FormData from "form-data";
 import fs from "fs/promises";
 import path from "path";
 import { glob } from "fast-glob";
-import { FileInput, HangarFile } from "./types.js";
-import { Logger } from "./logger.js";
+import { FileInput, HangarFile } from "../types.js";
+import { Logger } from "../logger.js";
 
-export class FileProcessor {
+export class FileResolver {
   private readonly logger: Logger;
 
   constructor(logger: Logger) {
     this.logger = logger;
   }
 
-  async processFiles(
+  /**
+   * Resolves the file inputs into the required FormData and HangarFile array.
+   * @param fileInputs the file inputs
+   * @returns the form data and file data array
+   */
+  async resolveFiles(
     fileInputs: FileInput[],
   ): Promise<{ form: FormData; filesData: HangarFile[] }> {
     const form = new FormData();
     const filesData: HangarFile[] = [];
 
-    this.logger.info(`Processing ${fileInputs.length} file input(s)`);
+    this.logger.info(`Resolving ${fileInputs.length} file input(s)`);
 
     for (let i = 0; i < fileInputs.length; i++) {
       const file = fileInputs[i];
-      this.logger.debug(`Processing file input ${i}`, file);
+      this.logger.debug(`Resolving file input ${i}`, file);
 
       try {
         if (file.path) {
-          await this.processFileFromPath(file, form, filesData);
+          await this.resolveFilesFromPath(file, form, filesData);
         } else if (file.url && file.externalUrl) {
-          this.processExternalFile(file, filesData);
+          this.addExternalFile(file, filesData);
         } else {
           throw new Error(
             `Invalid file configuration at index ${i}: ${JSON.stringify(file)}`,
           );
         }
       } catch (error) {
-        this.logger.error(`Failed to process file at index ${i}`, error);
+        this.logger.error(`Failed to resolve file at index ${i}`, error);
         throw new Error(
-          `File processing failed at index ${i}: ${error instanceof Error ? error.message : String(error)}`,
+          `File resolver failed at index ${i}: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
     }
 
-    this.logger.info(`Successfully processed ${filesData.length} file(s)`);
+    this.logger.info(`Successfully resolved ${filesData.length} file(s)`);
     return { form, filesData };
   }
 
-  private async processFileFromPath(
+  /**
+   * Adds all files matching the given path/glob pattern to the FormData and the filesData array.
+   * @param file the file input data
+   * @param form the form data object
+   * @param filesData the file data array
+   */
+  private async resolveFilesFromPath(
     file: FileInput,
     form: FormData,
     filesData: HangarFile[],
   ): Promise<void> {
-    if (!file.path) {
-      throw new Error("File path is required");
-    }
+    if (!file.path) throw new Error("File path is required");
 
     this.logger.debug(`Finding files matching pattern: ${file.path}`);
     const foundFiles = await glob(file.path, { absolute: true });
 
-    if (foundFiles.length === 0) {
+    if (foundFiles.length === 0)
       throw new Error(`No files found matching pattern: ${file.path}`);
-    }
 
     this.logger.info(
       `Found ${foundFiles.length} file(s) matching pattern: ${file.path}`,
@@ -71,6 +79,13 @@ export class FileProcessor {
     }
   }
 
+  /**
+   * Adds a file to the FormData and updates the filesData array.
+   * @param filePath the absolute path to the file
+   * @param platforms the platforms this file supports
+   * @param form the form data object
+   * @param filesData the file data array
+   */
   private async addFileToForm(
     filePath: string,
     platforms: FileInput["platforms"],
@@ -81,9 +96,7 @@ export class FileProcessor {
       await fs.access(filePath);
 
       const stats = await fs.stat(filePath);
-      if (!stats.isFile()) {
-        throw new Error(`Path is not a file: ${filePath}`);
-      }
+      if (!stats.isFile()) throw new Error(`Path is not a file: ${filePath}`);
 
       this.logger.debug(
         `Adding file to form: ${filePath} (${stats.size} bytes)`,
@@ -102,15 +115,19 @@ export class FileProcessor {
       this.logger.debug(`Successfully added file: ${fileName}`);
     } catch (error) {
       throw new Error(
-        `Failed to process file ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to add file ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
 
-  private processExternalFile(file: FileInput, filesData: HangarFile[]): void {
-    if (!file.externalUrl) {
+  /**
+   * Adds an external file reference to the filesData array.
+   * @param file the file input data
+   * @param filesData the file data array
+   */
+  private addExternalFile(file: FileInput, filesData: HangarFile[]): void {
+    if (!file.externalUrl)
       throw new Error("External URL is required for external files");
-    }
 
     this.logger.debug(`Adding external file: ${file.externalUrl}`);
 

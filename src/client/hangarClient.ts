@@ -5,8 +5,9 @@ import {
   RestUploadResponse,
   VersionUpload,
   HangarError,
-} from "./types.js";
-import { Logger } from "./logger.js";
+} from "../types.js";
+import { Logger } from "../logger.js";
+import * as core from "@actions/core";
 
 export class HangarClient {
   private readonly baseUrl = "https://hangar.papermc.io/api/v1";
@@ -16,18 +17,25 @@ export class HangarClient {
     this.logger = logger;
   }
 
+  /**
+   * Authenticates with the Hangar API using the provided API token returning a reusable JWT.
+   * @param apiToken api token
+   * @param slug project slug
+   * @returns JWT for interacting with the hangar API
+   */
   async authenticate(apiToken: string, slug: string): Promise<string> {
-    const url = `${this.baseUrl}/authenticate?apiKey=${encodeURIComponent(apiToken)}`;
-
     this.logger.debug("Authenticating with Hangar API");
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "User-Agent": `hangar-publish; ${slug};`,
+      const response = await fetch(
+        `${this.baseUrl}/authenticate?apiKey=${encodeURIComponent(apiToken)}`,
+        {
+          method: "POST",
+          headers: {
+            "User-Agent": `hangar-publish; ${slug};`,
+          },
         },
-      });
+      );
 
       const responseText = await response.text();
 
@@ -58,6 +66,8 @@ export class HangarClient {
         );
       }
 
+      core.setSecret(authResponse.token);
+
       this.logger.info("Successfully authenticated with Hangar API");
       this.logger.debug(`Token expires in: ${authResponse.expiresIn} seconds`);
 
@@ -74,14 +84,20 @@ export class HangarClient {
     }
   }
 
+  /**
+   * Uploads a new version to the specified project.
+   * @param slug project slug
+   * @param token JWT token
+   * @param form Form containing files to upload
+   * @param versionUpload version metadata to uplaod
+   * @returns upload response containing the URL of the uploaded version
+   */
   async uploadVersion(
     slug: string,
     token: string,
     form: FormData,
     versionUpload: VersionUpload,
   ): Promise<RestUploadResponse> {
-    const url = `${this.baseUrl}/projects/${encodeURIComponent(slug)}/upload`;
-
     this.logger.debug("Uploading version to Hangar", {
       version: versionUpload.version,
       channel: versionUpload.channel,
@@ -93,15 +109,18 @@ export class HangarClient {
     });
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "User-Agent": `hangar-publish; ${slug};`,
-          Authorization: token,
-          ...form.getHeaders(),
+      const response = await fetch(
+        `${this.baseUrl}/projects/${encodeURIComponent(slug)}/upload`,
+        {
+          method: "POST",
+          headers: {
+            "User-Agent": `hangar-publish; ${slug};`,
+            Authorization: token,
+            ...form.getHeaders(),
+          },
+          body: form,
         },
-        body: form,
-      });
+      );
 
       const responseText = await response.text();
 

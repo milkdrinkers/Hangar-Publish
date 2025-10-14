@@ -21,7 +21,7 @@ A GitHub Action to automate plugin releases to [Hangar](https://hangar.papermc.i
 
 - Create multi-platform releases on [Hangar](https://hangar.papermc.io) using GitHub Workflows.
 - Advanced Glob Pattern matching using [Glob](https://www.npmjs.com/package/glob) in file paths.
-- Semver version ranges support for dependency definitions like `>=1.19`.
+- Semver [version ranges support](https://github.com/npm/node-semver#ranges) for dependency definitions like `>=1.19`.
 
 ---
 
@@ -57,15 +57,15 @@ Add `milkdrinkers/Hangar-Publish@v1` to your workflow with the desired configura
 | `slug`      | Your project's unique identifier on Hangar |
 | `version`   | Version string for this release |
 | `channel`   | Release channel (e.g., `Release`, `Beta`, `Alpha`, or other custom channel) |
-| `files`     | JSON array of files to upload (see [File Configuration](#file-configuration)) |
+| `files`     | JSON array of file entries to upload (see [File Configuration](#file-configuration)) |
 
 ### Optional Parameters
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `description` | Release notes/changelog the release | `""` |
-| `plugin_dependencies` | Dependencies on other plugins | `{}` |
-| `platform_dependencies` | Supported Minecraft versions | `{}` |
+| `description` | Release notes/changelog for the release | `""` |
+| `plugin_dependencies` | Dependencies on other projects | `{}` |
+| `platform_dependencies` | Supported Platforms and Platform versions | `{}` |
 
 ---
 
@@ -179,13 +179,13 @@ platform_dependencies: |
 
 #### Plugin Dependencies
 
-`plugin_dependencies` specifies which dependencies your plugin supports.
+`plugin_dependencies` specifies which dependencies your project supports.
 
 - `<object>` - JSON object holding you configuration.
   - `<platform>` - The platform this configuration is for, either `PAPER`, `VELOCITY` or `WATERFALL`.
     - `name` a project slug, or when `externalUrl` is used, the external projects name.
     - `required` wether this dependency is required or not.
-    - `externalUrl` optional URL to a plugin. If not set `name` will be used as a Project Slug.
+    - `externalUrl` optional URL to a project. If not set `name` will be used as a Project Slug.
 
 ```yaml
 plugin_dependencies: |

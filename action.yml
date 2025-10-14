@@ -22,12 +22,17 @@ inputs:
     description: 'Release channel type (e.g., "Release", "Beta", "Alpha", "Snapshot")'
     required: true
 
+  description:
+    description: 'Markdown-formatted release description/changelog'
+    required: false
+    default: ''
+
   files:
     description: |
-      JSON array of files to upload. Each file must specify:
-      - platforms: Array of ["PAPER", "VELOCITY", "WATERFALL"]
-      - Either: path (glob pattern for local files) OR url + externalUrl for external files
-      
+      JSON array of files to upload. Each file entry must specify:
+      - `path` (glob pattern for local files) OR `url` & `externalUrl` for external files
+      - `platforms`: Array of `["PAPER", "VELOCITY", "WATERFALL"]`
+
       Example:
       [
         {
@@ -46,17 +51,35 @@ inputs:
       ]
     required: true
 
-  description:
-    description: 'Markdown-formatted release description/changelog'
-    required: false
-    default: ''
-
   plugin_dependencies:
     description: |
-      JSON object mapping plugin names to version ranges
-      Example: {"WorldEdit": "7.2.15", "Vault": "1.7.3"}
+      JSON object defining project dependecies per platform.
+      
+      Each platform maps to an array of dependency objects with:
+      - name: Project slug or name (if using externalUrl)
+      - required: Boolean indicating if the dependency is required
+      - externalUrl (optional): URL to an external project if not on Hangar
+
+      Example:
+      {
+        "PAPER": [
+          {
+            "name": "Vault",
+            "required": true
+          },
+          {
+            "name": "WorldEdit",
+            "required": false
+          },
+          {
+            "name": "PlaceholderAPI", 
+            "required": false,
+            "externalUrl": "https://www.spigotmc.org/resources/placeholderapi.6245/"
+          }
+        ]
+      }
     required: false
-    default: '{}'
+    default: ''
 
   platform_dependencies:
     description: |
@@ -73,7 +96,7 @@ inputs:
       VELOCITY/WATERFALL use exact versions only:
       Example: {"PAPER": [">=1.19.0"], "VELOCITY": ["3.2.0"], "WATERFALL": ["1.19"]}
     required: false
-    default: '{}'
+    default: ''
 
 outputs:
   upload_url:

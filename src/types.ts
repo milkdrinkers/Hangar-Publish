@@ -1,4 +1,7 @@
-export type HangarPlatform = "PAPER" | "WATERFALL" | "VELOCITY";
+import { ValidatedInputs } from "./input/inputValidation.js";
+
+export const HANGAR_PLATFORMS = ["PAPER", "VELOCITY", "WATERFALL"] as const;
+export type HangarPlatform = (typeof HANGAR_PLATFORMS)[number];
 
 export interface FileInput {
   path?: string;
@@ -13,12 +16,18 @@ export interface HangarFile {
   externalUrl?: string;
 }
 
+export interface PluginDependency {
+  name: string;
+  required: boolean;
+  externalUrl?: string;
+}
+
 export interface VersionUpload {
   version: string;
   channel: string;
   description?: string;
   files: HangarFile[];
-  pluginDependencies: Record<string, string>;
+  pluginDependencies: Record<string, PluginDependency[]>;
   platformDependencies: Record<string, string[]>;
 }
 
@@ -31,16 +40,7 @@ export interface RestUploadResponse {
   url: string;
 }
 
-export interface ActionInputs {
-  apiToken: string;
-  slug: string;
-  version: string;
-  channel: string;
-  files: FileInput[];
-  description?: string;
-  pluginDependencies: Record<string, string>;
-  platformDependencies: Record<string, string[]>;
-}
+export type ActionInputs = ValidatedInputs;
 
 export class HangarError extends Error {
   constructor(
