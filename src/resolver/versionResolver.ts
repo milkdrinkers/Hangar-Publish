@@ -6,6 +6,7 @@ import {
   normalizeVersionForSemver,
   normalizeVersionPattern,
 } from "../util/semverUtils.js";
+import { getVelocityVersions } from "./velocityVersionResolver.js";
 
 export class VersionResolver {
   private readonly logger: Logger;
@@ -41,35 +42,22 @@ export class VersionResolver {
           );
           break;
         case "VELOCITY":
-          // Hangar doesn't accept the real velocity version as returned by the PaperMC API, instead it only accepts weird variations
-          // FIXME Temporarily hardcode velocity versions until Hangard exposes API to get versions
-
           // Currently this code does:
-          // - Matches version patterns against Fill's velocity versions
-          // - Maps matched Fill velocity versions to Hangar velocity versions
+          // - Matches version patterns against Hangar's velocity versions
+          // - Maps matched Hangar semver velocity versions to Hangar velocity versions
 
-          const velocityVersions = [
-            { fill: "3.4.0", hangar: "3.4" },
-            { fill: "3.3.0", hangar: "3.3" },
-            { fill: "3.2.0", hangar: "3.2" },
-            { fill: "3.1.1", hangar: "3.1.1" },
-            { fill: "3.1.0", hangar: "3.1.0" },
-            { fill: "3.0.0", hangar: "3.0" },
-            { fill: "1.1.9", hangar: "1.1.9" },
-            { fill: "1.1.0", hangar: "1.1" },
-            { fill: "1.0.0", hangar: "1.0" },
-          ];
+          const velocityVersions = await getVelocityVersions(platform);
 
           const results = this.resolveVersions(
             versionPatterns,
-            velocityVersions.map((v) => v.fill),
+            velocityVersions.map((v) => v.semver),
           );
 
           resolved[platform] = results
             .map((v) => {
-              // Map fill version into hangar version
+              // Map semver version into hangar version
               for (const ver of velocityVersions) {
-                if (ver.fill === v) return ver.hangar;
+                if (ver.semver === v) return ver.hangar;
               }
               return null;
             })
