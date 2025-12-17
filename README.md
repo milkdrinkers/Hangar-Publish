@@ -43,7 +43,7 @@ A GitHub Action to automate plugin releases to [Hangar](https://hangar.papermc.i
 
 ### 3. Add to Workflow
 
-Add `milkdrinkers/Hangar-Publish@v1` to your workflow with the desired configuration.
+Add `milkdrinkers/Hangar-Publish@v2` to your workflow with the desired configuration.
 
 ---
 
@@ -237,7 +237,7 @@ jobs:
         run: ./gradlew build
         
       - name: Upload to Hangar
-        uses: milkdrinkers/Hangar-Publish@v1
+        uses: milkdrinkers/Hangar-Publish@v2
         with:
           api_token: ${{ secrets.HANGAR_TOKEN }}
           slug: ${{ github.event.repository.name }}
@@ -266,7 +266,7 @@ jobs:
 
 ```yaml
 - name: Upload to Hangar
-  uses: milkdrinkers/Hangar-Publish@v1
+  uses: milkdrinkers/Hangar-Publish@v2
   with:
     api_token: ${{ secrets.HANGAR_TOKEN }}
     slug: MyNetworkPlugin
@@ -322,7 +322,7 @@ jobs:
 ```yaml
 - name: Upload Beta to Hangar
   if: contains(github.event.release.tag_name, 'beta')
-  uses: milkdrinkers/Hangar-Publish@v1
+  uses: milkdrinkers/Hangar-Publish@v2
   with:
     api_token: ${{ secrets.HANGAR_TOKEN }}
     slug: MyPlugin
