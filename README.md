@@ -1,19 +1,22 @@
-<h1 style="text-align:center;">Hangar Publish</h1>
+<div align="center">
+  <h1>Hangar Publish</h1>
 
-<p style="text-align:center;">
-    <a href="https://github.com/milkdrinkers/Hangar-Publish/blob/main/LICENSE">
-        <img alt="GitHub License" src="https://img.shields.io/github/license/milkdrinkers/Hangar-Publish?style=for-the-badge&color=blue&labelColor=141417">
-    </a>
-    <a href="https://github.com/milkdrinkers/Hangar-Publish/releases">
-        <img alt="GitHub Release" src="https://img.shields.io/github/v/release/milkdrinkers/Hangar-Publish?include_prereleases&sort=semver&style=for-the-badge&label=LATEST%20VERSION&labelColor=141417">
-    </a>
-    <a href="https://github.com/milkdrinkers/Hangar-Publish/issues">
-        <img alt="GitHub Issues" src="https://img.shields.io/github/issues/milkdrinkers/Hangar-Publish?style=for-the-badge&labelColor=141417">
-    </a>
-    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/milkdrinkers/Hangar-Publish?style=for-the-badge&labelColor=141417">
-</p>
+  A GitHub Action to automate plugin releases to [Hangar](https://hangar.papermc.io), PaperMC's official plugin repository, forked and improved off of [Ben Woo's Hangar Upload Action](https://github.com/benwoo1110/hangar-upload-action).
 
-A GitHub Action to automate plugin releases to [Hangar](https://hangar.papermc.io), PaperMC's official plugin repository, forked and imrpoved off of [Ben Woo's Hangar Upload Action](https://github.com/benwoo1110/hangar-upload-action).
+  <br>
+  <div align="center">
+      <a href="https://github.com/milkdrinkers/Hangar-Publish/blob/main/LICENSE">
+          <img alt="GitHub License" src="https://img.shields.io/github/license/milkdrinkers/Hangar-Publish?style=for-the-badge&color=blue&labelColor=141417">
+      </a>
+      <a href="https://github.com/milkdrinkers/Hangar-Publish/releases">
+          <img alt="GitHub Release" src="https://img.shields.io/github/v/release/milkdrinkers/Hangar-Publish?include_prereleases&sort=semver&style=for-the-badge&label=LATEST%20VERSION&labelColor=141417">
+      </a>
+      <a href="https://github.com/milkdrinkers/Hangar-Publish/issues">
+          <img alt="GitHub Issues" src="https://img.shields.io/github/issues/milkdrinkers/Hangar-Publish?style=for-the-badge&labelColor=141417">
+      </a>
+      <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/milkdrinkers/Hangar-Publish?style=for-the-badge&labelColor=141417">
+  </div>
+</div>
 
 ---
 
@@ -77,7 +80,7 @@ Add `milkdrinkers/Hangar-Publish@v2` to your workflow with the desired configura
 `files` specifies which files to upload for what platforms:
 
 - `<array>` - JSON array holding you configurations.
-  - `<entry>` - JSON object holding a configuration entry. 
+  - `<entry>` - JSON object holding a configuration entry.
     - `path` a file path to what you wish to upload. Suppports advanced [Glob](https://www.digitalocean.com/community/tools/glob) patterns.
     - `platforms` - JSON array holding a list of platforms.
       - `<platform>` - A platform entry, either `PAPER`, `VELOCITY` or `WATERFALL`.
@@ -85,6 +88,7 @@ Add `milkdrinkers/Hangar-Publish@v2` to your workflow with the desired configura
     - `externalURL` url to the file to download, used instead of `path`.
 
 #### Upload JAR File
+
 ```json
 [
   {
@@ -95,6 +99,7 @@ Add `milkdrinkers/Hangar-Publish@v2` to your workflow with the desired configura
 ```
 
 #### Multiple Platform Support
+
 Mark `.jar` compatibility with multiple platforms.
 
 ```json
@@ -107,6 +112,7 @@ Mark `.jar` compatibility with multiple platforms.
 ```
 
 #### External Download Link
+
 Point to a external download link.
 
 ```json
@@ -120,6 +126,7 @@ Point to a external download link.
 ```
 
 #### Multiple Files
+
 Upload different `.jar` files for each platform. 
 
 ```json
@@ -136,6 +143,7 @@ Upload different `.jar` files for each platform.
 ```
 
 #### Use Glob Pattern
+
 This will upload any `.jar` files that exist under any directory `/build/libs/`, excluding files with names ending in `-sources.jar` & `-javadoc.jar`.
 
 ```json
@@ -163,6 +171,7 @@ This will upload any `.jar` files that exist under any directory `/build/libs/`,
     - `<array>` a JSON array holding all the supported versions. Suppport
 
 Supported Semver version patterns:
+
 - Exact versions: `"1.20.4"`
 - Minimum versions: `">=1.19"`
 - Version ranges: `"1.16-1.18.2"`
@@ -349,20 +358,24 @@ jobs:
 
 ### Common Issues
 
-**"Invalid API token"**
+#### "Invalid API token"
+
 - Make sure your token is stored in GitHub Secrets
 - Verify the token has upload permissions
 - Check that the token hasn't expired
 
-**"Project not found"**  
+#### "Project not found"
+
 - Verify the `slug` matches your project's identifier on Hangar
 - Ensure your project exists and you have upload permissions
 
-**"Invalid version format"**
+#### "Invalid version format"
+
 - Use semantic versioning (e.g., `1.0.0`, `2.1.3-beta`)
 - Avoid special characters in version strings
 
-**"File not found"**
+#### "File not found"
+
 - Check that the file path is correct relative to the workspace
 - Ensure your build step completed successfully
 - Verify the JAR file was actually created
