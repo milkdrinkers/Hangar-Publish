@@ -390,7 +390,7 @@ Making your issue easy to read and follow will usually result in it being handle
 
 ## 🔧 Contributing
 
-Contributions are always welcome! Please make sure to read our [Contributor's Guide](CONTRIBUTING.md) for before submitting any pull requests.
+Contributions are always welcome! Please make sure to read our [Contributor's Guide](./docs/CONTRIBUTING.md) for before submitting any pull requests.
 
 ---
 
