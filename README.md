@@ -5,16 +5,19 @@
 
   <br>
   <div align="center">
-      <a href="https://github.com/milkdrinkers/Hangar-Publish/blob/main/LICENSE">
-          <img alt="GitHub License" src="https://img.shields.io/github/license/milkdrinkers/Hangar-Publish?style=for-the-badge&color=blue&labelColor=141417">
-      </a>
-      <a href="https://github.com/milkdrinkers/Hangar-Publish/releases">
-          <img alt="GitHub Release" src="https://img.shields.io/github/v/release/milkdrinkers/Hangar-Publish?include_prereleases&sort=semver&style=for-the-badge&label=LATEST%20VERSION&labelColor=141417">
-      </a>
-      <a href="https://github.com/milkdrinkers/Hangar-Publish/issues">
-          <img alt="GitHub Issues" src="https://img.shields.io/github/issues/milkdrinkers/Hangar-Publish?style=for-the-badge&labelColor=141417">
-      </a>
-      <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/milkdrinkers/Hangar-Publish?style=for-the-badge&labelColor=141417">
+    <a href="https://github.com/milkdrinkers/Hangar-Publish/blob/main/LICENSE">
+        <img alt="GitHub License" src="https://img.shields.io/github/license/milkdrinkers/Hangar-Publish?style=for-the-badge&color=blue&labelColor=141417">
+    </a>
+    <a href="https://github.com/milkdrinkers/Hangar-Publish/releases">
+        <img alt="GitHub Release" src="https://img.shields.io/github/v/release/milkdrinkers/Hangar-Publish?include_prereleases&sort=semver&style=for-the-badge&label=LATEST%20VERSION&labelColor=141417">
+    </a>
+    <a href="https://github.com/milkdrinkers/Hangar-Publish/issues">
+        <img alt="GitHub Issues" src="https://img.shields.io/github/issues/milkdrinkers/Hangar-Publish?style=for-the-badge&labelColor=141417">
+    </a>
+    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/milkdrinkers/Hangar-Publish?style=for-the-badge&labelColor=141417">
+    <a href="https://discord.gg/cG5uWvUcM6">
+      <img alt="Discord Server" src="https://img.shields.io/discord/1008300159333040158?style=for-the-badge&logo=discord&logoColor=ffffff&label=discord&labelColor=141417&color=%235865F2">
+    </a>
   </div>
 </div>
 
