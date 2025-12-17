@@ -1,12 +1,13 @@
 import * as semver from "semver";
 import { Logger } from "../logger.js";
-import { getMinecraftVersions } from "./minecraftVersionResolver.js";
-import { getPaperMCVersions } from "./paperVersionResolver.js";
 import {
   normalizeVersionForSemver,
   normalizeVersionPattern,
 } from "../util/semverUtils.js";
-import { getVelocityVersions } from "./velocityVersionResolver.js";
+import {
+  getPlatformVersions,
+  HangarPlatformVersion,
+} from "./hangarVersionResolver.js";
 
 export class VersionResolver {
   private readonly logger: Logger;
@@ -33,44 +34,20 @@ export class VersionResolver {
         versionPatterns,
       );
 
-      switch (platform) {
-        case "PAPER":
-          let versionsMinecraft = await getMinecraftVersions();
-          resolved[platform] = this.resolveVersions(
-            versionPatterns,
-            versionsMinecraft,
-          );
+      const platformLower = platform.toLowerCase();
+
+      switch (platformLower) {
+        case "paper":
+          let paperVersions = await getPlatformVersions(platformLower);
+          resolved[platform] = this.resolve(versionPatterns, paperVersions);
           break;
-        case "VELOCITY":
-          // Currently this code does:
-          // - Matches version patterns against Hangar's velocity versions
-          // - Maps matched Hangar semver velocity versions to Hangar velocity versions
-
-          const velocityVersions = await getVelocityVersions(platform);
-
-          const results = this.resolveVersions(
-            versionPatterns,
-            velocityVersions.map((v) => v.semver),
-          );
-
-          resolved[platform] = results
-            .map((v) => {
-              // Map semver version into hangar version
-              for (const ver of velocityVersions) {
-                if (ver.semver === v) return ver.hangar;
-              }
-              return null;
-            })
-            .filter((v) => v !== null);
+        case "velocity":
+          let velocityVersions = await getPlatformVersions(platformLower);
+          resolved[platform] = this.resolve(versionPatterns, velocityVersions);
           break;
-        case "WATERFALL":
-          let versionsWaterfall = await getPaperMCVersions(
-            platform.toLowerCase(),
-          );
-          resolved[platform] = this.resolveVersions(
-            versionPatterns,
-            versionsWaterfall,
-          );
+        case "waterfall":
+          let waterfallVersions = await getPlatformVersions(platformLower);
+          resolved[platform] = this.resolve(versionPatterns, waterfallVersions);
           break;
         default:
           throw new Error("Invalid platform dependency name");
@@ -81,15 +58,39 @@ export class VersionResolver {
   }
 
   /**
+   * Wrapper for resolveVersions taking HangarPlatformVersion[] as input.
+   * @param versionPatterns version patterns to resolve
+   * @param versions list of available version platform versions to resolve against
+   * @returns resolved hangar versions
+   */
+  private resolve(
+    versionPatterns: string[],
+    versions: HangarPlatformVersion[],
+  ) {
+    // Find matching versions using semver
+    const semverMatches = this.resolveVersions(
+      versionPatterns,
+      versions.map((v) => v.semver),
+    );
+
+    return semverMatches
+      .map((semverVersion) => {
+        // Map semver version into hangar version
+        for (const ver of versions) {
+          if (ver.semver === semverVersion) return ver.hangar;
+        }
+        return null;
+      })
+      .filter((v) => v !== null);
+  }
+
+  /**
    * Resolve version patterns against a list of available versions using semver.
    * @param versionPatterns version patterns to resolve
    * @param versions list of available version strings to resolve against
    * @returns resolved version strings
    */
-  private resolveVersions(
-    versionPatterns: string[],
-    versions: string[],
-  ): string[] {
+  private resolveVersions(versionPatterns: string[], versions: string[]) {
     // Resolve versions from versions using patterns
     const resolvedVersions = new Set(
       versionPatterns.flatMap((pattern) =>
@@ -130,10 +131,7 @@ export class VersionResolver {
    * @param versions list of available versions
    * @returns list of matching version strings
    */
-  private resolveMatchingVersions(
-    versionPattern: string,
-    versions: string[],
-  ): string[] {
+  private resolveMatchingVersions(versionPattern: string, versions: string[]) {
     // try to normalize the pattern for semver
     const normalizedPattern = normalizeVersionPattern(versionPattern);
 
